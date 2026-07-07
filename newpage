@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QualityScape | Lawn Care & Landscaping in Central Florida</title>
+  <meta name="description" content="QualityScape provides honest lawn care, landscape details, and free estimates across Central Florida. Call or text 321-488-7188." />
+
+  <!-- GitHub / Netlify ready: upload this file as index.html. No build step needed. -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --turf:#1f6e3c;
+      --turf-dark:#123d22;
+      --turf-soft:#e8f4e2;
+      --leaf:#9bd77b;
+      --sun:#f3b247;
+      --soil:#2b2620;
+      --muted:#66715f;
+      --paper:#f5f7f2;
+      --card:#ffffff;
+      --line:#dce3d7;
+      --shadow:0 20px 60px rgba(18,61,34,.15);
+      --display:'Sora',system-ui,sans-serif;
+      --body:'Public Sans',system-ui,sans-serif;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--body);color:var(--soil);background:var(--paper);line-height:1.6}
+    img{max-width:100%;display:block}
+    a{color:inherit}
+    .container{width:min(1160px,calc(100% - 36px));margin:0 auto}
+    .section{padding:84px 0}
+    .section-title{font:800 clamp(2rem,4vw,3rem)/1.05 var(--display);letter-spacing:-.04em;color:var(--turf-dark);margin-bottom:14px}
+    .section-copy{max-width:700px;color:var(--muted);font-size:1.04rem}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid rgba(31,110,60,.22);border-radius:999px;background:rgba(155,215,123,.18);color:var(--turf-dark);font:700 .76rem var(--display);letter-spacing:.08em;text-transform:uppercase}
+    .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--leaf)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:14px 22px;background:var(--turf);color:#fff;text-decoration:none;font:800 .95rem var(--display);box-shadow:0 12px 28px rgba(31,110,60,.25);cursor:pointer}
+    .btn:hover{background:#185a31;transform:translateY(-1px)}
+    .btn.alt{background:#fff;color:var(--turf-dark);border:1px solid rgba(18,61,34,.14);box-shadow:none}
+    .btn.light{background:var(--leaf);color:var(--turf-dark);box-shadow:none}
+    .btn.full{width:100%}
+
+    .topbar{background:var(--turf-dark);color:#eaf4e4;font-size:.9rem}
+    .topbar .container{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:9px 0}
+    .topbar a{text-decoration:none;color:#eaf4e4}
+    .topbar a:hover{text-decoration:underline}
+
+    .nav{position:sticky;top:0;z-index:1000;background:rgba(245,247,242,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(220,227,215,.8)}
+    .nav .container{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--turf),var(--leaf));display:grid;place-items:center;color:#fff;font:900 1.2rem var(--display);box-shadow:0 10px 24px rgba(31,110,60,.24)}
+    .brand strong{font:800 1.2rem var(--display);letter-spacing:-.03em;color:var(--turf-dark)}
+    .brand span{display:block;color:var(--muted);font-size:.78rem;margin-top:-2px}
+    .nav-links{display:flex;align-items:center;gap:22px;font-weight:700;font-size:.92rem;color:#40503a}
+    .nav-links a{text-decoration:none}
+    .nav-links a:hover{color:var(--turf)}
+
+    .hero{position:relative;overflow:hidden;padding:90px 0 68px;background:
+      radial-gradient(circle at 12% 18%,rgba(155,215,123,.42),transparent 28%),
+      linear-gradient(135deg,#f5f7f2 0%,#e7f2df 58%,#cfeac2 100%)}
+    .hero::after{content:"";position:absolute;inset:auto -12% -44% 54%;height:620px;border-radius:50%;background:rgba(31,110,60,.12);filter:blur(8px)}
+    .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:44px;align-items:center}
+    .hero h1{font:800 clamp(3rem,6vw,5.5rem)/.94 var(--display);letter-spacing:-.07em;color:var(--turf-dark);margin:18px 0}
+    .hero p{font-size:1.13rem;color:#506048;max-width:620px}
+    .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:34px;max-width:620px}
+    .stat{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:16px;box-shadow:0 16px 40px rgba(18,61,34,.08)}
+    .stat strong{display:block;font:800 1.55rem var(--display);color:var(--turf-dark)}
+    .stat span{font-size:.85rem;color:var(--muted);font-weight:700}
+    .hero-card{border-radius:34px;overflow:hidden;background:#fff;box-shadow:var(--shadow);position:relative;border:8px solid rgba(255,255,255,.7)}
+    .hero-card img{width:100%;height:520px;object-fit:cover}
+    .rating-card{position:absolute;left:18px;bottom:18px;right:18px;background:rgba(255,255,255,.94);border-radius:22px;padding:16px;display:flex;align-items:center;gap:14px;box-shadow:0 16px 34px rgba(0,0,0,.14)}
+    .rating-card img{width:132px;height:auto;object-fit:contain;border-radius:0}
+    .rating-card strong{font:800 1rem var(--display);color:var(--turf-dark);display:block}
+    .rating-card span{font-size:.86rem;color:var(--muted)}
+
+    .quick-contact{margin-top:-34px;position:relative;z-index:5}
+    .quick-contact .container{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .contact-pill{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:22px;padding:20px;text-decoration:none;display:flex;gap:14px;align-items:flex-start}
+    .contact-pill .icon{width:42px;height:42px;border-radius:14px;background:var(--turf-soft);display:grid;place-items:center;color:var(--turf);font-weight:900}
+    .contact-pill strong{display:block;font:800 .96rem var(--display);color:var(--turf-dark)}
+    .contact-pill span{display:block;color:var(--muted);font-size:.92rem;margin-top:2px}
+
+    .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+    .service-card{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:26px;box-shadow:0 14px 38px rgba(18,61,34,.06)}
+    .service-card .num{font:900 .78rem var(--display);color:var(--turf);letter-spacing:.1em}
+    .service-card h3{font:800 1.35rem/1.15 var(--display);letter-spacing:-.03em;color:var(--turf-dark);margin:10px 0}
+    .service-card p{color:var(--muted);font-size:.96rem}
+    .service-card ul{list-style:none;margin-top:18px;display:grid;gap:9px;color:#4a5744;font-size:.94rem;font-weight:600}
+    .service-card li{display:flex;gap:9px;align-items:flex-start}
+    .service-card li::before{content:"✓";color:var(--turf);font-weight:900}
+
+    .split{display:grid;grid-template-columns:.95fr 1.05fr;gap:34px;align-items:center}
+    .image-stack{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .image-stack img{height:255px;width:100%;object-fit:cover;border-radius:24px;box-shadow:0 12px 30px rgba(18,61,34,.12)}
+    .image-stack img:first-child{grid-column:1/3;height:330px}
+    .feature-list{display:grid;gap:14px;margin:26px 0}
+    .feature{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}
+    .feature b{width:34px;height:34px;border-radius:12px;background:var(--turf-soft);display:grid;place-items:center;color:var(--turf);flex-shrink:0}
+    .feature strong{display:block;font:800 .98rem var(--display);color:var(--turf-dark)}
+    .feature span{color:var(--muted);font-size:.92rem}
+
+    .estimate-section{background:linear-gradient(180deg,#123d22 0%,#1f6e3c 100%);color:#fff;overflow:hidden}
+    .estimate-section .section-title{color:#fff}
+    .estimate-section .section-copy{color:#dcefd3}
+    .estimate-shell{margin-top:34px;background:var(--paper);color:var(--soil);border-radius:30px;overflow:hidden;box-shadow:0 28px 70px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.14)}
+    header.widget-head{padding:16px 24px 12px;border-bottom:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+    header.widget-head h3{font-family:var(--display);font-weight:800;font-size:1.25rem;color:var(--turf-dark);letter-spacing:-.02em}
+    header.widget-head p{font-size:.85rem;color:#5a6355;margin-top:2px}
+    .head-phone{font:800 .9rem var(--display);color:var(--turf);text-decoration:none;white-space:nowrap}
+    .head-phone:hover{text-decoration:underline}
+    .layout{display:flex;min-height:620px}
+    .map-wrap{flex:1;position:relative;min-height:520px}
+    #map{position:absolute;inset:0;cursor:crosshair;z-index:1}
+    #map.browsing{cursor:grab}
+    .searchbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:900;display:flex;gap:8px;width:min(480px,calc(100% - 28px))}
+    .searchbar input{flex:1;padding:11px 14px;border:1px solid var(--line);border-radius:10px;font:600 .95rem var(--body);background:var(--card);box-shadow:0 4px 14px rgba(18,61,34,.18)}
+    .searchbar input:focus{outline:2px solid var(--turf);outline-offset:1px}
+    .searchbar button{padding:11px 18px;border:0;border-radius:10px;background:var(--turf);color:#fff;font:800 .95rem var(--display);cursor:pointer;box-shadow:0 4px 14px rgba(18,61,34,.18)}
+    .searchbar button:hover{background:#185a31}
+    .map-hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(18,61,34,.92);color:#eaf4e4;padding:9px 16px;border-radius:999px;font-size:.85rem;font-weight:600;pointer-events:none;white-space:nowrap;max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}
+    aside.panel{width:360px;flex-shrink:0;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;overflow-y:auto}
+    .steps{padding:18px 20px 6px;display:flex;flex-direction:column;gap:14px}
+    .step{display:flex;gap:12px;align-items:flex-start;opacity:.45;transition:opacity .25s}
+    .step.active,.step.done{opacity:1}
+    .step .dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:800 .8rem var(--display);border:2px solid var(--turf);color:var(--turf)}
+    .step.done .dot{background:var(--turf);color:#fff}
+    .step h3{font:800 .92rem var(--display);color:var(--turf-dark)}
+    .step p{font-size:.82rem;color:#5a6355;margin-top:2px;line-height:1.45}
+    .draw-actions{display:flex;gap:8px;padding:12px 20px 0;flex-wrap:wrap}
+    .draw-actions button{padding:8px 13px;border-radius:8px;font:800 .82rem var(--body);cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--soil)}
+    .draw-actions button.primary{background:var(--turf);border-color:var(--turf);color:#fff}
+    .draw-actions button:hover{filter:brightness(.96)}
+    .draw-actions button:disabled{opacity:.4;cursor:not-allowed}
+    .ticket{margin:18px 20px 14px;background:var(--turf-dark);border-radius:14px;color:#eaf4e4;padding:20px;position:relative;overflow:hidden}
+    .ticket::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.07;background:repeating-linear-gradient(105deg,#fff 0 18px,transparent 18px 36px)}
+    .ticket .label{font:800 .72rem var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--leaf)}
+    .ticket .sqft{font:800 2.4rem/1.1 var(--display);letter-spacing:-.02em;margin:6px 0 2px;color:#fff;font-variant-numeric:tabular-nums}
+    .ticket .sqft small{font:700 1rem var(--display);color:var(--leaf)}
+    .ticket .sections{font-size:.8rem;color:#b8cdb0;margin-bottom:14px}
+    .band-track{display:flex;gap:4px;margin:10px 0 6px;position:relative;z-index:1}
+    .band-track span{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.16);transition:background .3s}
+    .band-track span.lit{background:var(--leaf)}
+    .band-names{display:flex;font-size:.62rem;color:#8faf87;letter-spacing:.04em;text-transform:uppercase}
+    .band-names span{flex:1;text-align:center}
+    .price{margin-top:16px;padding-top:14px;border-top:1px dashed rgba(255,255,255,.25);position:relative;z-index:1}
+    .price .amount{font:800 1.7rem var(--display);color:#fff}
+    .price .per,.price .service{font-size:.85rem;color:#b8cdb0}
+    .cta{display:block;text-align:center;margin-top:14px;padding:12px;border-radius:10px;background:var(--leaf);color:var(--turf-dark);font:800 .95rem var(--display);text-decoration:none;position:relative;z-index:1}
+    .cta:hover{filter:brightness(1.05)}
+    .cta.secondary{background:transparent;border:1.5px solid var(--leaf);color:var(--leaf);margin-top:8px}
+    .fineprint{padding:0 20px 20px;font-size:.72rem;color:#8a9484;line-height:1.5}
+    .leaflet-container{font-family:var(--body)}
+    .vertex-icon{background:transparent;border:0}
+
+    .pricing{background:#fff}
+    .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+    .price-card{border:1px solid var(--line);border-radius:28px;padding:28px;background:linear-gradient(180deg,#fff,#f8fbf5);box-shadow:0 14px 38px rgba(18,61,34,.06);position:relative;overflow:hidden}
+    .price-card.featured{border-color:rgba(31,110,60,.42);box-shadow:0 20px 54px rgba(31,110,60,.16)}
+    .price-card h3{font:800 1.35rem var(--display);color:var(--turf-dark);letter-spacing:-.03em}
+    .price-card .amount{font:800 2.3rem var(--display);color:var(--turf);margin:14px 0 3px}
+    .price-card .amount span{font-size:1rem;color:var(--muted)}
+    .price-card p{color:var(--muted)}
+    .price-card ul{list-style:none;margin:22px 0;display:grid;gap:10px;font-weight:600;color:#465240}
+    .price-card li{display:flex;gap:9px}
+    .price-card li::before{content:"✓";color:var(--turf);font-weight:900}
+
+    .gallery-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:14px;margin-top:34px}
+    .gallery-grid img{height:280px;width:100%;object-fit:cover;border-radius:24px;box-shadow:0 12px 30px rgba(18,61,34,.1)}
+    .gallery-grid img:first-child{height:574px;grid-row:span 2}
+
+    .quote{background:linear-gradient(135deg,#e8f4e2,#f5f7f2)}
+    .quote-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:34px;align-items:start}
+    .quote-card{background:#fff;border:1px solid var(--line);border-radius:30px;padding:28px;box-shadow:var(--shadow)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field{display:flex;flex-direction:column;gap:7px}
+    .field.full{grid-column:1/3}
+    label{font-weight:800;color:var(--turf-dark);font-size:.9rem}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;font:500 .98rem var(--body);background:#fbfcfa;color:var(--soil)}
+    textarea{min-height:126px;resize:vertical}
+    input:focus,select:focus,textarea:focus{outline:2px solid rgba(31,110,60,.35);border-color:var(--turf)}
+    .small-note{font-size:.8rem;color:var(--muted);margin-top:10px}
+    .footer{background:var(--turf-dark);color:#dcefd3;padding:52px 0 24px}
+    .footer-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:26px;margin-bottom:34px}
+    .footer h3,.footer h4{font-family:var(--display);color:#fff;margin-bottom:10px}
+    .footer p,.footer a{color:#dcefd3;text-decoration:none}
+    .footer a:hover{text-decoration:underline}
+    .copyright{border-top:1px solid rgba(255,255,255,.12);padding-top:20px;color:#b8cdb0;font-size:.88rem}
+
+    @media (max-width:920px){
+      .hero-grid,.split,.quote-grid{grid-template-columns:1fr}
+      .quick-contact .container,.services-grid,.pricing-grid,.footer-grid{grid-template-columns:1fr}
+      .layout{flex-direction:column}
+      aside.panel{width:100%;border-left:0;border-top:1px solid var(--line)}
+      .map-wrap{min-height:58vh}
+      .gallery-grid{grid-template-columns:1fr 1fr}
+      .gallery-grid img:first-child{grid-column:1/3;height:360px}
+      .nav-links{display:none}
+    }
+    @media (max-width:620px){
+      .section{padding:58px 0}
+      .hero{padding:64px 0 58px}
+      .stats,.form-grid,.gallery-grid{grid-template-columns:1fr}
+      .field.full,.gallery-grid img:first-child{grid-column:auto}
+      .hero-card img,.gallery-grid img,.gallery-grid img:first-child{height:310px}
+      .quick-contact{margin-top:0;padding-top:18px;background:var(--paper)}
+      .topbar .container{display:block}
+      .rating-card{position:static;border-radius:0}
+    }
+    @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <span>Residential & commercial lawn care across Central Florida</span>
+      <span><a href="tel:+13214887188">Call/Text: 321-488-7188</a> &nbsp; | &nbsp; <a href="mailto:QualityScape321@gmail.com">QualityScape321@gmail.com</a></span>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="container">
+      <a class="brand" href="#home" aria-label="QualityScape home">
+        <div class="mark">QS</div>
+        <div><strong>QualityScape</strong><span>Lawn & Landscape</span></div>
+      </a>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#estimate">Instant Estimate</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#work">Our Work</a>
+        <a href="#quote">Request a Quote</a>
+      </div>
+      <a class="btn" href="#quote">Free Estimate</a>
+    </div>
+  </nav>
+
+  <main id="home">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Trusted lawn care</span>
+          <h1>Beat prices. Keep quality unmatched.</h1>
+          <p>QualityScape delivers honest, professional, and reliable lawn and landscape services for homes and businesses. Get clean cuts, crisp edges, detailed landscape care, and a fast free quote.</p>
+          <div class="hero-actions">
+            <a class="btn" href="#estimate">Trace Your Yard</a>
+            <a class="btn alt" href="tel:+13214887188">Call 321-488-7188</a>
+          </div>
+          <div class="stats" aria-label="QualityScape highlights">
+            <div class="stat"><strong>6+</strong><span>years serving Florida</span></div>
+            <div class="stat"><strong>5.0</strong><span>Google-rated service</span></div>
+            <div class="stat"><strong>24/7</strong><span>storm response options</span></div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <img src="https://qualityscape.odoo.com/web/image/602-1291d454/IMG_2091.webp" alt="Freshly cut residential lawn by QualityScape" />
+          <div class="rating-card">
+            <img src="https://qualityscape.odoo.com/web/image/591-7a9590a3/Untitled%20design-.webp" alt="Google 5.0 star rating" />
+            <div><strong>Professional results</strong><span>Clean mowing, edging, trimming, and blow-off every visit.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-contact" aria-label="Quick contact options">
+      <div class="container">
+        <a class="contact-pill" href="tel:+13214887188"><span class="icon">☎</span><div><strong>Call or text</strong><span>321-488-7188</span></div></a>
+        <a class="contact-pill" href="mailto:QualityScape321@gmail.com"><span class="icon">✉</span><div><strong>Email</strong><span>QualityScape321@gmail.com</span></div></a>
+        <a class="contact-pill" href="#quote"><span class="icon">⌁</span><div><strong>Free quote</strong><span>Tell us about the property and service needed.</span></div></a>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="container">
+        <span class="eyebrow">What we do</span>
+        <h2 class="section-title">Lawn care and landscaping without the stress.</h2>
+        <p class="section-copy">Choose a simple cut, a full landscape detail, or build a custom package around your property.</p>
+        <div class="services-grid">
+          <article class="service-card">
+            <span class="num">01</span>
+            <h3>Basic lawn care</h3>
+            <p>Reliable maintenance to keep grass looking smooth, sharp, and clean.</p>
+            <ul><li>Quality mow</li><li>Precision weedeating</li><li>Sharp edge</li><li>Clean blow-off</li></ul>
+          </article>
+          <article class="service-card">
+            <span class="num">02</span>
+            <h3>Landscape full detail</h3>
+            <p>More complete care for lawns, beds, bushes, shrubs, and debris cleanup.</p>
+            <ul><li>Mow, edge, weed-eat, blow</li><li>Landscape bed weed control</li><li>Bush and shrub trimming</li><li>Dead plant and debris removal</li></ul>
+          </article>
+          <article class="service-card">
+            <span class="num">03</span>
+            <h3>Custom packages</h3>
+            <p>Flexible service options based on what your property actually needs.</p>
+            <ul><li>Fully customizable</li><li>Residential or commercial</li><li>Affordable options</li><li>Free estimate before work begins</li></ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container split">
+        <div class="image-stack">
+          <img src="https://qualityscape.odoo.com/web/image/605-a7e9f958/IMG_1761.webp" alt="Detailed Florida landscape with clean hedges and grass" />
+          <img src="https://qualityscape.odoo.com/web/image/607-3c9648d9/IMG_2061.webp" alt="Cleaned up outdoor yard space" />
+          <img src="https://qualityscape.odoo.com/web/image/603-f5f76f07/Untitled%20design00.webp" alt="Trimmed bushes and landscape beds" />
+        </div>
+        <div>
+          <span class="eyebrow">Why QualityScape</span>
+          <h2 class="section-title">We treat every yard like it is our own.</h2>
+          <p class="section-copy">From quick maintenance to detailed cleanup, the goal is simple: fair pricing, dependable work, and customers who feel taken care of.</p>
+          <div class="feature-list">
+            <div class="feature"><b>1</b><div><strong>Fair, honest quotes</strong><span>No confusing packages. You get clear pricing based on the property and work needed.</span></div></div>
+            <div class="feature"><b>2</b><div><strong>Clean finished look</strong><span>Mowing, edging, trimming, and blowing are handled with attention to the details people notice.</span></div></div>
+            <div class="feature"><b>3</b><div><strong>Easy to reach</strong><span>Customers can call, text, email, or send a form request for quick help.</span></div></div>
+          </div>
+          <a class="btn" href="#quote">Request a Free Quote</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section estimate-section" id="estimate">
+      <div class="container">
+        <span class="eyebrow">Instant lawn estimate</span>
+        <h2 class="section-title">Trace the lawn and see a starting price.</h2>
+        <p class="section-copy">Search the address, click around the grass area, and the tool estimates square footage and a starting service price.</p>
+
+        <div class="estimate-shell">
+          <header class="widget-head">
+            <div>
+              <h3>Get your instant lawn estimate</h3>
+              <p>Trace your yard on the map — we beat prices, quality stays unmatched.</p>
+            </div>
+            <a class="head-phone" href="tel:+13214887188">Call or text 321-488-7188</a>
+          </header>
+
+          <div class="layout">
+            <div class="map-wrap">
+              <div class="searchbar">
+                <input id="addr" type="text" placeholder="Enter your address…" aria-label="Search address" />
+                <button id="searchBtn" type="button">Find it</button>
+              </div>
+              <div id="map" class="browsing" role="application" aria-label="Satellite map for tracing your lawn"></div>
+              <div class="map-hint" id="hint">Search your address to get started</div>
+            </div>
+
+            <aside class="panel">
+              <div class="steps">
+                <div class="step active" id="step1"><div class="dot">1</div><div><h3>Find your home</h3><p>Type your address above, or pan and zoom until you can see your yard.</p></div></div>
+                <div class="step" id="step2"><div class="dot">2</div><div><h3>Trace your lawn</h3><p>Click each corner of the grass. Double-click or press Finish to close the shape. Add front and back yards separately.</p></div></div>
+                <div class="step" id="step3"><div class="dot">3</div><div><h3>See your estimate</h3><p>Your square footage and price update as you draw.</p></div></div>
+              </div>
+
+              <div class="draw-actions">
+                <button class="primary" id="startBtn" type="button">Start tracing</button>
+                <button id="finishBtn" type="button" disabled>Finish section</button>
+                <button id="undoBtn" type="button" disabled>Undo point</button>
+                <button id="clearBtn" type="button" disabled>Clear all</button>
+              </div>
+
+              <div class="ticket" aria-live="polite">
+                <div class="label">Measured lawn area</div>
+                <div class="sqft"><span id="sqft">0</span> <small>sq ft</small></div>
+                <div class="sections" id="sectionCount">No sections traced yet</div>
+                <div class="band-track" id="bandTrack"></div>
+                <div class="band-names" id="bandNames"></div>
+                <div class="price">
+                  <div class="amount" id="priceAmount">—</div>
+                  <div class="per" id="pricePer"></div>
+                  <div class="service" id="serviceName"></div>
+                </div>
+                <a class="cta" id="ctaLink" href="#quote">Lock in this price</a>
+                <a class="cta secondary" href="tel:+13214887188">Call or text us now</a>
+              </div>
+              <p class="fineprint">Estimates cover the Basic Lawn Care package: quality mow, precision weedeating, sharp edge, and clean blow. Final pricing confirmed on-site — slopes, gates, and obstacles can affect it. Serving Brevard, Seminole &amp; Orange County. Satisfaction guaranteed.</p>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section pricing" id="pricing">
+      <div class="container">
+        <span class="eyebrow">Pricing plans</span>
+        <h2 class="section-title">Competitive packages built around your property.</h2>
+        <p class="section-copy">Pricing can change based on size, gates, slopes, obstacles, and service frequency. These are starting points for review.</p>
+        <div class="pricing-grid">
+          <article class="price-card featured">
+            <h3>Basic lawn care</h3>
+            <div class="amount">$30 <span>/ cut</span></div>
+            <p>For regular lawn maintenance with a clean finished look.</p>
+            <ul><li>Quality mow</li><li>Precision weedeating</li><li>Sharp edge</li><li>Clean blow</li></ul>
+            <a class="btn full" href="#quote">Start Now</a>
+          </article>
+          <article class="price-card">
+            <h3>Landscape full detail</h3>
+            <div class="amount">$60 <span>/ visit</span></div>
+            <p>For bed care, bush shaping, cleanup, and fuller detail work.</p>
+            <ul><li>Mow, edge, weed-eat, blow</li><li>Landscape bed weed control</li><li>Bush/shrub trimming</li><li>Storm response options</li></ul>
+            <a class="btn full alt" href="#quote">Request Details</a>
+          </article>
+          <article class="price-card">
+            <h3>Personalized package</h3>
+            <div class="amount">$45 <span>/ cut</span></div>
+            <p>A custom plan made for the exact lawn or landscape needs.</p>
+            <ul><li>Flexible</li><li>Fully customizable</li><li>Versatile</li><li>Affordable</li></ul>
+            <a class="btn full alt" href="#quote">Build Package</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="work">
+      <div class="container">
+        <span class="eyebrow">Recent work</span>
+        <h2 class="section-title">A quick look at the results.</h2>
+        <p class="section-copy">Use these images as placeholders from the current Odoo site. Replace them in GitHub whenever the client sends newer photos.</p>
+        <div class="gallery-grid">
+          <img src="https://qualityscape.odoo.com/web/image/604-c5497188/IMG_2093.webp" alt="Freshly maintained residential lawn" />
+          <img src="https://qualityscape.odoo.com/web/image/606-940c65ac/IMG_2074.webp" alt="Overgrown outdoor area before cleanup" />
+          <img src="https://qualityscape.odoo.com/web/image/608-2b2a4523/Untitled%20design22.webp" alt="Palm trimming work" />
+          <img src="https://qualityscape.odoo.com/web/image/609-4a1c5c2e/Untitled%20design88.webp" alt="Palm and landscape cleanup" />
+          <img src="https://qualityscape.odoo.com/web/image/605-a7e9f958/IMG_1761.webp" alt="Detailed hedge and lawn maintenance" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section quote" id="quote">
+      <div class="container quote-grid">
+        <div>
+          <span class="eyebrow">Request a quote</span>
+          <h2 class="section-title">Tell us what the property needs.</h2>
+          <p class="section-copy">This form is ready for Netlify Forms. After the site is deployed on Netlify, submissions will appear in the Netlify dashboard and can be forwarded to the client’s email.</p>
+          <div class="feature-list">
+            <div class="feature"><b>☎</b><div><strong>Prefer texting?</strong><span><a href="tel:+13214887188">321-488-7188</a></span></div></div>
+            <div class="feature"><b>✉</b><div><strong>Email directly</strong><span><a href="mailto:QualityScape321@gmail.com">QualityScape321@gmail.com</a></span></div></div>
+          </div>
+        </div>
+        <form class="quote-card" name="qualityscape-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="qualityscape-quote" />
+          <p style="display:none"><label>Do not fill this out: <input name="bot-field" /></label></p>
+          <div class="form-grid">
+            <div class="field"><label for="name">Your Name *</label><input id="name" name="name" type="text" required /></div>
+            <div class="field"><label for="phone">Phone Number *</label><input id="phone" name="phone" type="tel" required /></div>
+            <div class="field"><label for="email">Your Email</label><input id="email" name="email" type="email" /></div>
+            <div class="field"><label for="address">Property Address/City</label><input id="address" name="property-address" type="text" /></div>
+            <div class="field"><label for="service">Services Needed</label><select id="service" name="service-needed"><option>Basic lawn care</option><option>Landscape full detail</option><option>Personalized package</option><option>Storm response / cleanup</option><option>Not sure yet</option></select></div>
+            <div class="field"><label for="time">Best Time to Contact</label><input id="time" name="best-time" type="text" placeholder="Morning, afternoon, evening..." /></div>
+            <div class="field full"><label for="message">Message *</label><textarea id="message" name="message" required placeholder="Tell us about the yard, size, gate access, frequency, or anything else."></textarea></div>
+          </div>
+          <button class="btn full" type="submit" style="margin-top:16px">Send Quote Request</button>
+          <p class="small-note">GitHub Pages alone will not email this form. Deploy through Netlify and enable form notifications to send submissions to the client.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3>QualityScape</h3>
+          <p>Florida's trusted residential and commercial lawn and landscape company. Honest work, fair pricing, and clean results.</p>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <p><a href="tel:+13214887188">321-488-7188</a></p>
+          <p><a href="mailto:QualityScape321@gmail.com">QualityScape321@gmail.com</a></p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <p><a href="#services">Services</a></p>
+          <p><a href="#estimate">Instant Estimate</a></p>
+          <p><a href="#quote">Request a Quote</a></p>
+        </div>
+      </div>
+      <div class="copyright">© <span id="year"></span> QualityScape. Website draft built for GitHub/Netlify review.</div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ================================================================
+       QUALITYSCAPE INSTANT ESTIMATE CONFIG
+       The $30 Small price matches the live pricing page. Confirm the
+       other estimate bands with the owner before launching publicly.
+    ================================================================ */
+    const PRICING = {
+      service: "Basic lawn care",
+      per: "per cut",
+      ctaHref: "#quote",
+      bands: [
+        { name: "Small",   maxSqFt: 5000,    price: 30 },
+        { name: "Medium",  maxSqFt: 10000,   price: 40 },
+        { name: "Large",   maxSqFt: 20000,   price: 55 },
+        { name: "XL",      maxSqFt: 43560,   price: 75 },
+        { name: "Estate",  maxSqFt: Infinity, price: null }
+      ],
+      customQuoteLabel: "Custom quote",
+      ctaCustomHref: "#quote"
+    };
+
+    const START_VIEW = { lat: 28.52, lng: -81.05, zoom: 10 };
+    const map = L.map('map', { doubleClickZoom: true }).setView([START_VIEW.lat, START_VIEW.lng], START_VIEW.zoom);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 20,
+      maxNativeZoom: 19,
+      attribution: 'Imagery &copy; Esri &amp; contributors'
+    }).addTo(map);
+
+    let drawing = false;
+    let currentPts = [];
+    let currentLayer = null;
+    let vertexMarkers = [];
+    const sections = [];
+
+    const $ = id => document.getElementById(id);
+    const hint = $('hint');
+
+    function geodesicAreaSqFt(latLngs){
+      const R = 6378137, rad = Math.PI/180;
+      let area = 0, n = latLngs.length;
+      if (n < 3) return 0;
+      for (let i = 0; i < n; i++){
+        const p1 = latLngs[i], p2 = latLngs[(i+1)%n];
+        area += (p2.lng - p1.lng)*rad * (2 + Math.sin(p1.lat*rad) + Math.sin(p2.lat*rad));
+      }
+      return Math.abs(area * R * R / 2) * 10.7639;
+    }
+
+    const bandTrack = $('bandTrack'), bandNames = $('bandNames');
+    PRICING.bands.forEach(b => {
+      bandTrack.appendChild(document.createElement('span'));
+      const n = document.createElement('span');
+      n.textContent = b.name;
+      bandNames.appendChild(n);
+    });
+
+    function bandIndex(sqft){
+      return PRICING.bands.findIndex(b => sqft <= b.maxSqFt);
+    }
+
+    function updateTicket(){
+      const inProgress = drawing && currentPts.length >= 3 ? geodesicAreaSqFt(currentPts) : 0;
+      const total = sections.reduce((s, x) => s + x.areaSqFt, 0) + inProgress;
+      const sqft = Math.round(total);
+
+      $('sqft').textContent = sqft.toLocaleString();
+      $('sectionCount').textContent = sections.length === 0
+        ? (drawing ? 'Tracing first section…' : 'No sections traced yet')
+        : sections.length + ' section' + (sections.length > 1 ? 's' : '') + ' traced' + (drawing ? ' + 1 in progress' : '');
+
+      const idx = sqft > 0 ? bandIndex(sqft) : -1;
+      [...bandTrack.children].forEach((el, i) => el.classList.toggle('lit', i <= idx && idx >= 0));
+
+      const cta = $('ctaLink');
+      if (sqft === 0){
+        $('priceAmount').textContent = '—';
+        $('pricePer').textContent = '';
+        $('serviceName').textContent = '';
+        cta.href = PRICING.ctaHref;
+        cta.textContent = 'Lock in this price';
+      } else {
+        const band = PRICING.bands[idx];
+        if (band.price === null){
+          $('priceAmount').textContent = PRICING.customQuoteLabel;
+          $('pricePer').textContent = 'we will come take a look — free';
+          cta.href = PRICING.ctaCustomHref;
+          cta.textContent = 'Request a free quote';
+        } else {
+          $('priceAmount').textContent = 'Starting at $' + band.price;
+          $('pricePer').textContent = PRICING.per;
+          cta.href = PRICING.ctaHref;
+          cta.textContent = 'Lock in this price';
+        }
+        $('serviceName').textContent = PRICING.service + ' · ' + band.name + ' lawn';
+      }
+
+      $('step3').classList.toggle('done', sqft > 0);
+    }
+
+    const lawnStyle = { color:'#9bd77b', weight:2.5, fillColor:'#2e9e52', fillOpacity:.35 };
+
+    function vertexIcon(){
+      return L.divIcon({
+        className:'vertex-icon',
+        iconSize:[12,12],
+        html:'<div style="width:12px;height:12px;border-radius:50%;background:#9bd77b;border:2px solid #123d22"></div>'
+      });
+    }
+
+    function redrawCurrent(){
+      if (currentLayer){ map.removeLayer(currentLayer); currentLayer = null; }
+      if (currentPts.length === 0) return;
+      currentLayer = currentPts.length >= 3
+        ? L.polygon(currentPts, lawnStyle).addTo(map)
+        : L.polyline(currentPts, { color:'#9bd77b', weight:2.5, dashArray:'6 6' }).addTo(map);
+    }
+
+    function setDrawing(on){
+      drawing = on;
+      map.doubleClickZoom[on ? 'disable' : 'enable']();
+      $('map').classList.toggle('browsing', !on);
+      $('startBtn').textContent = on ? 'Add another section' : (sections.length ? 'Add another section' : 'Start tracing');
+      $('startBtn').disabled = on;
+      $('finishBtn').disabled = !on;
+      $('undoBtn').disabled = !on;
+      $('clearBtn').disabled = sections.length === 0 && !on;
+      $('step1').classList.add('done');
+      $('step1').classList.remove('active');
+      $('step2').classList.toggle('active', on);
+      hint.textContent = on
+        ? 'Click each corner of the grass · double-click to finish'
+        : (sections.length ? 'Add another section, or lock in your price below' : 'Press “Start tracing”, then click your lawn’s corners');
+      setTimeout(() => map.invalidateSize(), 50);
+    }
+
+    map.on('click', e => {
+      if (!drawing) return;
+      currentPts.push(e.latlng);
+      const m = L.marker(e.latlng, { icon: vertexIcon(), interactive:false }).addTo(map);
+      vertexMarkers.push(m);
+      redrawCurrent();
+      updateTicket();
+    });
+
+    map.on('dblclick', () => { if (drawing) finishSection(); });
+
+    function finishSection(){
+      if (currentPts.length < 3){
+        hint.textContent = 'Click at least 3 corners to make a shape';
+        return;
+      }
+      const areaSqFt = geodesicAreaSqFt(currentPts);
+      if (currentLayer) map.removeLayer(currentLayer);
+      const layer = L.polygon(currentPts, lawnStyle).addTo(map);
+      sections.push({ layer, areaSqFt });
+      vertexMarkers.forEach(m => map.removeLayer(m));
+      vertexMarkers = [];
+      currentPts = [];
+      currentLayer = null;
+      setDrawing(false);
+      updateTicket();
+    }
+
+    $('startBtn').addEventListener('click', () => {
+      if (map.getZoom() < 17){
+        hint.textContent = 'Zoom in closer to your yard first (search your address above)';
+        return;
+      }
+      setDrawing(true);
+      updateTicket();
+    });
+
+    $('finishBtn').addEventListener('click', finishSection);
+    $('undoBtn').addEventListener('click', () => {
+      currentPts.pop();
+      const m = vertexMarkers.pop();
+      if (m) map.removeLayer(m);
+      redrawCurrent();
+      updateTicket();
+    });
+    $('clearBtn').addEventListener('click', () => {
+      sections.forEach(s => map.removeLayer(s.layer));
+      sections.length = 0;
+      vertexMarkers.forEach(m => map.removeLayer(m));
+      vertexMarkers = [];
+      currentPts = [];
+      if (currentLayer) map.removeLayer(currentLayer);
+      currentLayer = null;
+      setDrawing(false);
+      updateTicket();
+    });
+
+    async function search(){
+      const q = $('addr').value.trim();
+      if (!q) return;
+      hint.textContent = 'Searching…';
+      try{
+        const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q));
+        const data = await res.json();
+        if (data && data.length){
+          map.setView([+data[0].lat, +data[0].lon], 19);
+          setTimeout(() => map.invalidateSize(), 120);
+          hint.textContent = 'Found it — press “Start tracing” and click your lawn’s corners';
+          $('step1').classList.add('done');
+          $('step2').classList.add('active');
+        } else {
+          hint.textContent = 'Address not found — try adding city and state, or pan the map by hand';
+        }
+      } catch {
+        hint.textContent = 'Search unavailable right now — pan and zoom to your home instead';
+      }
+    }
+
+    $('searchBtn').addEventListener('click', search);
+    $('addr').addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+
+    document.querySelectorAll('a[href="#estimate"]').forEach(link => {
+      link.addEventListener('click', () => setTimeout(() => map.invalidateSize(), 500));
+    });
+
+    updateTicket();
+  </script>
+</body>
+</html>
